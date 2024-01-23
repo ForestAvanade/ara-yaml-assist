@@ -1,71 +1,36 @@
-# ara-yaml-assist README
+# Ara YAML Assistant
 
-This is the README for your extension "ara-yaml-assist". After writing up a brief description, we recommend including the following sections.
+## Description
+
+Ara YAML Assistant is a Visual Studio Code extension designed to enhance the experience of working with YAML configuration files in the Ara data pipeline. It provides context-aware auto-completion, syntax validation, and other helpful features to streamline the development process.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- **Context-Aware Auto-Completion**: Intelligent suggestions based on the structure and context of your YAML files, including support for custom directives and properties.
+- **Syntax Validation**: Checks your YAML files for errors and provides helpful feedback.
+- **Support for Multiple YAML Types (In Future Version)**: Tailored assistance for different types of YAML files, such as data pipeline configurations and endpoint definitions. Current version only supports data pipeline configurations.
+- **Easy Activation and Deactivation (In Future Version)**: Quickly toggle the extension's functionality with a customizable hotkey.
 
-For example if there is an image subfolder under your extension project workspace:
+## Usage
 
-\!\[feature X\]\(images/feature-x.png\)
+After installing the extension, open a YAML file in VS Code. The extension will automatically provide context-aware suggestions as you type. 
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+## Installation
 
-## Requirements
+You can install Ara YAML Assistant from the Visual Studio Code Marketplace. Search for "Ara YAML Assistant" and click "Install."
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+## Customization
 
-## Extension Settings
+To customize the hotkey for toggling the extension, go to `File > Preferences > Keyboard Shortcuts` and search for "Toggle Extension Activation."
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+## Contributing
 
-For example:
+Contributions to Ara YAML Assistant are welcome. Please refer to our contribution guidelines for more information.
 
-This extension contributes the following settings:
+## License
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+This extension is licensed under the [MIT License](LICENSE).
 
-## Known Issues
+## Support
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+If you encounter any issues or have suggestions for improvements, please submit an issue on our [GitHub repository](https://github.com/your-repo/ara-yaml-assistant).
