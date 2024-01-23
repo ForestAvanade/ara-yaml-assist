@@ -29,8 +29,8 @@ Contributions to Ara YAML Assistant are welcome. Please refer to our contributio
 
 ## License
 
-This extension is licensed under the [MIT License](LICENSE).
+This extension is licensed under the [MIT License](https://www.mit.edu/~amini/LICENSE.md).
 
 ## Support
 
-If you encounter any issues or have suggestions for improvements, please submit an issue on our [GitHub repository](https://github.com/your-repo/ara-yaml-assistant).
+If you encounter any issues or have suggestions for improvements, please submit an issue on our [GitHub repository](https://github.com/ForestAvanade/ara-yaml-assist).
