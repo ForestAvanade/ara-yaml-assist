@@ -3,8 +3,9 @@
   "displayName": "ara-yaml-assist",
   "description": "Avanade ARA configurations and data pipelines yaml assistant to help clients draft Ara applications more efficiently.",
   "version": "0.0.1",
+  "icon": "icon.png",
   "engines": {
-    "vscode": "^1.85.0"
+    "vscode": ">=1.64.1"
   },
   "publisher": "ForestDeng",
   "repository": {
