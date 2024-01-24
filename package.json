@@ -2,7 +2,7 @@
   "name": "ara-yaml-assist",
   "displayName": "ara-yaml-assist",
   "description": "Avanade ARA configurations and data pipelines yaml assistant to help clients draft Ara applications more efficiently.",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "icon": "icon.png",
   "engines": {
     "vscode": ">=1.64.1"
