@@ -400,6 +400,9 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
 						let triggersItem = new vscode.CompletionItem("triggers:", vscode.CompletionItemKind.Property);
 						triggersItem.documentation = new vscode.MarkdownString("Define the triggers (cron or dependency) for your data pipeline.");
 						suggestions.push(triggersItem);
+						let matchEnvItem = new vscode.CompletionItem("!match_env", vscode.CompletionItemKind.Property);
+						matchEnvItem.documentation = new vscode.MarkdownString("match the environment to take different configuration loading.");
+						suggestions.push(matchEnvItem);
 					}
 				} else if (this.getParentKeyAtLevel(document, position.line, indentLevel - 1) === "job_def") 
 				{
@@ -671,6 +674,23 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
 						suggestions.push(new vscode.CompletionItem("spark", vscode.CompletionItemKind.Value));
 						suggestions.push(new vscode.CompletionItem("python", vscode.CompletionItemKind.Value));
 					}
+					if (linePrefix.trim().endsWith("verbose_metrics:")) {
+						// Suggestions for 'verbose_metrics' values
+						suggestions.push(new vscode.CompletionItem("true", vscode.CompletionItemKind.Value));
+						suggestions.push(new vscode.CompletionItem("false", vscode.CompletionItemKind.Value));
+					}
+					if (linePrefix.trim().endsWith("peek_enabled:")) {
+						// Suggestions for 'peek_enabled' values
+						suggestions.push(new vscode.CompletionItem("true", vscode.CompletionItemKind.Value));
+						suggestions.push(new vscode.CompletionItem("false", vscode.CompletionItemKind.Value));
+					}
+					if (linePrefix.trim().endsWith("layer:")){
+						// Suggestions for 'layer' values
+						suggestions.push(new vscode.CompletionItem("raw", vscode.CompletionItemKind.Value));
+						suggestions.push(new vscode.CompletionItem("bronze", vscode.CompletionItemKind.Value));
+						suggestions.push(new vscode.CompletionItem("silver", vscode.CompletionItemKind.Value));
+						suggestions.push(new vscode.CompletionItem("gold", vscode.CompletionItemKind.Value));
+					}
 
 					// Suggestions for properties under 'stream_reader'
 					// ... add properties for 'stream_reader'
@@ -727,6 +747,29 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
 						suggestions.push(sparkConfItem);
 
 					}
+				}
+				if (this.getParentKeyAtLevel(document, position.line, indentLevel - 1) === "match_env") {
+					if (linePrefix.trim() === "")
+					{
+						let devItem = new vscode.CompletionItem("dev:", vscode.CompletionItemKind.Property);
+						devItem.documentation = new vscode.MarkdownString("Define dev environment data pipeline context.");
+						suggestions.push(devItem);
+						
+						let testItem = new vscode.CompletionItem("test:", vscode.CompletionItemKind.Property);
+						testItem.documentation = new vscode.MarkdownString("Define test environment data pipeline context.");
+						suggestions.push(testItem);
+
+						let uatItem = new vscode.CompletionItem("uat:", vscode.CompletionItemKind.Property);
+						uatItem.documentation = new vscode.MarkdownString("Define uat environment data pipeline context.");
+						suggestions.push(uatItem);
+
+						let prodItem = new vscode.CompletionItem("prod:", vscode.CompletionItemKind.Property);
+						prodItem.documentation = new vscode.MarkdownString("Define prod environment data pipeline context.");
+						suggestions.push(prodItem);
+					}
+					if (linePrefix.trim().endsWith(":")) {
+						// Suggestions for 'dev' values
+						suggestions.push(new vscode.CompletionItem("!load_yaml ", vscode.CompletionItemKind.Property));}
 				}
 				if (linePrefix.trim().endsWith("spark_conf:"))
 				{	
@@ -932,10 +975,20 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
             const indentLevel = this.getIndentLevel(lineText);
             if (indentLevel === targetIndentLevel) {
                 // Extract the key at this line
-                const keyMatch = lineText.trim().match(/^(-\s*)?(\w+):/);
-                if (keyMatch) {
-                    return keyMatch[2];
-                }
+				const trim_line = lineText.trim();
+				if (!trim_line.startsWith("!")) {
+					const keyMatch = trim_line.match(/^(-\s*)?(\w+):/);
+					if (keyMatch) {
+						return keyMatch[2];
+					}
+				}
+				else {
+					const keyMatch = trim_line.match(/^(!\s*)?(\w+)/);
+					if (keyMatch) {
+						return keyMatch[2];
+					}
+
+				}
             }
             if (indentLevel < targetIndentLevel) {
                 // Reached a higher level block
