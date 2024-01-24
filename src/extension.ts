@@ -249,6 +249,10 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
 					suggestions.push(new vscode.CompletionItem("increment_detection_mode:", vscode.CompletionItemKind.Property));
 					suggestions.push(new vscode.CompletionItem("safe_schema_merge:", vscode.CompletionItemKind.Property));
 
+					let streamingModeItem = new vscode.CompletionItem("streaming_mode:", vscode.CompletionItemKind.Property);
+					streamingModeItem.documentation = new vscode.MarkdownString("Define the streaming mode for your data destination. <br> This is only valid for streaming data pipeline.");
+					suggestions.push(streamingModeItem);
+
 					let validFromItem = new vscode.CompletionItem("valid_from:", vscode.CompletionItemKind.Property);
 					validFromItem.documentation = new vscode.MarkdownString("Define the valid from (start date/timestamp) column in scd.");
 					suggestions.push(validFromItem);
@@ -282,7 +286,9 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
 					suggestions.push(new vscode.CompletionItem("csv", vscode.CompletionItemKind.Value));
 					suggestions.push(new vscode.CompletionItem("json", vscode.CompletionItemKind.Value));
 					suggestions.push(new vscode.CompletionItem("parquet", vscode.CompletionItemKind.Value));
-					suggestions.push(new vscode.CompletionItem("binary_body", vscode.CompletionItemKind.Value));
+					let binaryBodyItem = new vscode.CompletionItem("binary_body", vscode.CompletionItemKind.Value);
+					binaryBodyItem.documentation = new vscode.MarkdownString("This is only valid for File destination with `pandas` engine.");
+					suggestions.push(binaryBodyItem);
 					suggestions.push(new vscode.CompletionItem("delta", vscode.CompletionItemKind.Value));
 					suggestions.push(new vscode.CompletionItem("jdbc_sqlserver", vscode.CompletionItemKind.Value));
 					suggestions.push(new vscode.CompletionItem("jdbc_mysql", vscode.CompletionItemKind.Value));
@@ -317,11 +323,11 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
 					suggestions.push(new vscode.CompletionItem("false", vscode.CompletionItemKind.Value));
 				}
 				if (linePrefix.trim().endsWith("schema_evolution_rules:")){
-					suggestions.push(new vscode.CompletionItem("allow_new_columns", vscode.CompletionItemKind.Value));
-					suggestions.push(new vscode.CompletionItem("allow_drop_columns ", vscode.CompletionItemKind.Value));
-					suggestions.push(new vscode.CompletionItem("ignore_missing_columns", vscode.CompletionItemKind.Value));
-					suggestions.push(new vscode.CompletionItem("allow_all_type_changes", vscode.CompletionItemKind.Value));
-					suggestions.push(new vscode.CompletionItem("allow_safe_type_changes", vscode.CompletionItemKind.Value));
+					suggestions.push(new vscode.CompletionItem("[allow_new_columns]", vscode.CompletionItemKind.Value));
+					suggestions.push(new vscode.CompletionItem("[allow_drop_columns] ", vscode.CompletionItemKind.Value));
+					suggestions.push(new vscode.CompletionItem("[ignore_missing_columns]", vscode.CompletionItemKind.Value));
+					suggestions.push(new vscode.CompletionItem("[allow_all_type_changes]", vscode.CompletionItemKind.Value));
+					suggestions.push(new vscode.CompletionItem("[allow_safe_type_changes]", vscode.CompletionItemKind.Value));
 				}
 				if (linePrefix.trim().endsWith("increment_detection_mode:")){
 					suggestions.push(new vscode.CompletionItem("full_record", vscode.CompletionItemKind.Value));
@@ -339,6 +345,10 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
 				if (linePrefix.trim().endsWith("engine:")){
 					suggestions.push(new vscode.CompletionItem("spark", vscode.CompletionItemKind.Value));
 					suggestions.push(new vscode.CompletionItem("pandas", vscode.CompletionItemKind.Value));
+				}
+				if (linePrefix.trim().endsWith("streaming_mode:")){
+					suggestions.push(new vscode.CompletionItem("microbatching", vscode.CompletionItemKind.Value));
+					suggestions.push(new vscode.CompletionItem("structured_streaming", vscode.CompletionItemKind.Value));
 				}
 
 			}
@@ -563,6 +573,10 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
 						suggestions.push(new vscode.CompletionItem("spark", vscode.CompletionItemKind.Value));
 						suggestions.push(new vscode.CompletionItem("python", vscode.CompletionItemKind.Value));
 						suggestions.push(new vscode.CompletionItem("sql_tracker", vscode.CompletionItemKind.Value));
+
+						let pandasEngineItem = new vscode.CompletionItem("pandas", vscode.CompletionItemKind.Value);
+						pandasEngineItem.documentation = new vscode.MarkdownString("Only available for xlsx File Data source");
+						suggestions.push(pandasEngineItem);
 						let requestsEngineItem = new vscode.CompletionItem("requests", vscode.CompletionItemKind.Value);
 						requestsEngineItem.documentation = new vscode.MarkdownString("Only available for HTTP Data source");
 						suggestions.push(requestsEngineItem);
