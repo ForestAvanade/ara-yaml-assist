@@ -238,14 +238,24 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
 					suggestions.push(new vscode.CompletionItem("write_mode:", vscode.CompletionItemKind.Property));
 					suggestions.push(new vscode.CompletionItem("engine:", vscode.CompletionItemKind.Property));
 					suggestions.push(new vscode.CompletionItem("from:", vscode.CompletionItemKind.Property));
-					suggestions.push(new vscode.CompletionItem("primary_key:", vscode.CompletionItemKind.Property));
-					suggestions.push(new vscode.CompletionItem("scope_key:", vscode.CompletionItemKind.Property));
+					let primaryKeysItem = new vscode.CompletionItem("primary_keys:", vscode.CompletionItemKind.Property);
+					primaryKeysItem.documentation = new vscode.MarkdownString("Define the primary keys for your data destination. <br> The type is `list` not `string`.");
+					suggestions.push(primaryKeysItem);
+					let scope_keyItem = new vscode.CompletionItem("scope_key:", vscode.CompletionItemKind.Property);
+					scope_keyItem.documentation = new vscode.MarkdownString("Define the scope key for your data destination. <br> The type is `list` not `string`.");
+					suggestions.push(scope_keyItem);
 					suggestions.push(new vscode.CompletionItem("event_order:", vscode.CompletionItemKind.Property));
-					suggestions.push(new vscode.CompletionItem("partition_columns:", vscode.CompletionItemKind.Property));
+					let partitionColumnsItem = new vscode.CompletionItem("partition_columns:", vscode.CompletionItemKind.Property);
+					partitionColumnsItem.documentation = new vscode.MarkdownString("Define the partition columns for your data destination. <br> The type is `list` not `string`.");
+					suggestions.push(partitionColumnsItem);
 					suggestions.push(new vscode.CompletionItem("event_action:", vscode.CompletionItemKind.Property));
 					suggestions.push(new vscode.CompletionItem("pk_violations_handling_action:", vscode.CompletionItemKind.Property));
-					suggestions.push(new vscode.CompletionItem("uppercase_pk_columns:", vscode.CompletionItemKind.Property));
-					suggestions.push(new vscode.CompletionItem("schema_evolution_rules:", vscode.CompletionItemKind.Property));
+					let uppercasePkColumnsItem = new vscode.CompletionItem("uppercase_pk_columns:", vscode.CompletionItemKind.Property);
+					uppercasePkColumnsItem.documentation = new vscode.MarkdownString("Define which the primary key columns are uppercased. <br> The type is `list` not `string`.");
+					suggestions.push(uppercasePkColumnsItem);
+					let schemaEvolutionRulesItem = new vscode.CompletionItem("schema_evolution_rules:", vscode.CompletionItemKind.Property);
+					schemaEvolutionRulesItem.documentation = new vscode.MarkdownString("Define the schema evolution rules for your data destination. <br> The type is `list` not `string`.");
+					suggestions.push(schemaEvolutionRulesItem);
 					suggestions.push(new vscode.CompletionItem("increment_detection_mode:", vscode.CompletionItemKind.Property));
 					suggestions.push(new vscode.CompletionItem("safe_schema_merge:", vscode.CompletionItemKind.Property));
 
@@ -266,10 +276,10 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
 					validToOffsetItem.documentation = new vscode.MarkdownString("Define the valid to offset (e.g. `1 (1 day for date format, and 1 second for timestamp)`) in scd.");
 					suggestions.push(validToOffsetItem);
 					let scdCompWithTargetItem = new vscode.CompletionItem("scd_excluded_comparison_columns:", vscode.CompletionItemKind.Property);
-					scdCompWithTargetItem.documentation = new vscode.MarkdownString("Define the excluded comparison columns between incoming dataframe and target delta table.");
+					scdCompWithTargetItem.documentation = new vscode.MarkdownString("Define the excluded comparison columns between incoming dataframe and target delta table. <br> The type is `list` not `string`.");
 					suggestions.push(scdCompWithTargetItem);
 					let scdCompDedupeItem = new vscode.CompletionItem("scd_excluded_dedup_comparison_cols:", vscode.CompletionItemKind.Property);
-					scdCompDedupeItem.documentation = new vscode.MarkdownString("Define the excluded comparison columns among the incoming dataframe.");
+					scdCompDedupeItem.documentation = new vscode.MarkdownString("Define the excluded comparison columns among the incoming dataframe. <br> The type is `list` not `string`.");
 					suggestions.push(scdCompDedupeItem);
 
 					let dedupByFileModTimeItem = new vscode.CompletionItem("dedup_by_file_mod_timestamp:", vscode.CompletionItemKind.Property);
@@ -301,6 +311,7 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
 					suggestions.push(new vscode.CompletionItem("bronze", vscode.CompletionItemKind.Value));
 					suggestions.push(new vscode.CompletionItem("silver", vscode.CompletionItemKind.Value));
 					suggestions.push(new vscode.CompletionItem("gold", vscode.CompletionItemKind.Value));
+                    suggestions.push(new vscode.CompletionItem("external", vscode.CompletionItemKind.Value));
 				}
 				if (linePrefix.trim().endsWith("write_mode:")) {
 					// Suggestions for 'write_mode' values
@@ -506,7 +517,12 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
 						suggestions.push(new vscode.CompletionItem("endpoint:", vscode.CompletionItemKind.Property));
 						suggestions.push(new vscode.CompletionItem("endpoint_type:", vscode.CompletionItemKind.Property));	
 						suggestions.push(new vscode.CompletionItem("engine:", vscode.CompletionItemKind.Property));
-						suggestions.push(new vscode.CompletionItem("preprocess_functions:", vscode.CompletionItemKind.Property));
+						let partitionColumnsItem = new vscode.CompletionItem("partition_columns:", vscode.CompletionItemKind.Property);
+						partitionColumnsItem.documentation = new vscode.MarkdownString("Define the partition columns for your data source. <br> The type is `list` not `string`.");
+						suggestions.push(partitionColumnsItem);
+						let preProcessFunctionsItem = new vscode.CompletionItem("preprocess_functions:", vscode.CompletionItemKind.Property);
+						preProcessFunctionsItem.documentation = new vscode.MarkdownString("Define the preprocess functions. <br> The type is `list` not `string`.");
+						suggestions.push(preProcessFunctionsItem);
 						suggestions.push(new vscode.CompletionItem("driving:", vscode.CompletionItemKind.Property));
 						suggestions.push(new vscode.CompletionItem("file_mask:", vscode.CompletionItemKind.Property));
 						suggestions.push(new vscode.CompletionItem("increment_method:", vscode.CompletionItemKind.Property));
@@ -567,6 +583,7 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
 						suggestions.push(new vscode.CompletionItem("bronze", vscode.CompletionItemKind.Value));
 						suggestions.push(new vscode.CompletionItem("silver", vscode.CompletionItemKind.Value));
 						suggestions.push(new vscode.CompletionItem("gold", vscode.CompletionItemKind.Value));
+                        suggestions.push(new vscode.CompletionItem("external", vscode.CompletionItemKind.Value));
 					}
 					if (linePrefix.trim().endsWith("engine:")) {
 						// Suggestions for 'engine' values
@@ -623,7 +640,9 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
 						suggestions.push(new vscode.CompletionItem("format:", vscode.CompletionItemKind.Property));
 						suggestions.push(new vscode.CompletionItem("endpoint:", vscode.CompletionItemKind.Property));
 						suggestions.push(new vscode.CompletionItem("engine:", vscode.CompletionItemKind.Property));
-						suggestions.push(new vscode.CompletionItem("preprocess_functions:", vscode.CompletionItemKind.Property));
+						let preProcessFunctionsItem = new vscode.CompletionItem("preprocess_functions:", vscode.CompletionItemKind.Property);
+						preProcessFunctionsItem.documentation = new vscode.MarkdownString("Define the preprocess functions. <br> The type is `list` not `string`.");
+						suggestions.push(preProcessFunctionsItem);
 						suggestions.push(new vscode.CompletionItem("verbose_metrics:", vscode.CompletionItemKind.Property));
 						let consumerGroupItem = new vscode.CompletionItem("consumer_group:", vscode.CompletionItemKind.Property);
 						consumerGroupItem.documentation = new vscode.MarkdownString("Consumer group name for Event Hub");
@@ -661,7 +680,7 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
 						trackingColumnTypeItem.documentation = new vscode.MarkdownString("Default column type is timestamp, you can use timestamp, decimal, int, binary and string");
 						suggestions.push(trackingColumnTypeItem);
 						let trackingColumnsItem = new vscode.CompletionItem("tracking_columns:", vscode.CompletionItemKind.Property);
-						trackingColumnsItem.documentation = new vscode.MarkdownString("Column names (combination) to be used for incremental loading. Only for SQL Server Streaming.");
+						trackingColumnsItem.documentation = new vscode.MarkdownString("Column names (combination) to be used for incremental loading. Only for SQL Server Streaming. <br> The type is `list` not `string`.");
 						suggestions.push(trackingColumnsItem);
 					}
 
@@ -704,6 +723,7 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
 						suggestions.push(new vscode.CompletionItem("bronze", vscode.CompletionItemKind.Value));
 						suggestions.push(new vscode.CompletionItem("silver", vscode.CompletionItemKind.Value));
 						suggestions.push(new vscode.CompletionItem("gold", vscode.CompletionItemKind.Value));
+                        suggestions.push(new vscode.CompletionItem("external", vscode.CompletionItemKind.Value));
 					}
 
 					// Suggestions for properties under 'stream_reader'
@@ -897,10 +917,62 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
     }
 
 
-    private getIndentLevel(lineText: string): number {
-        const match = lineText.match(/^(\s*)/);
-        return match ? match[1].length / 2 : 0; // Assuming 2 spaces per indent level
-    }
+    // private getIndentLevel(lineText: string): number {
+    //     const match = lineText.match(/^(\s*)/);
+    //     return match ? match[1].length / 2 : 0; // Assuming 2 spaces per indent level
+    // }
+  private getIndentLevel(lineText: string): number {
+      // Retrieve the active text editor
+      const activeEditor = vscode.window.activeTextEditor;
+      
+      // Get the tabSize setting from the active editor, default to 4 if not available
+      const tabSize = activeEditor ? activeEditor.options.tabSize : 4;
+
+      // Ensure tabSize is a number before using it
+      const effectiveTabSize = typeof tabSize === 'number' ? tabSize : 4;
+
+      // Match the leading whitespace
+      const match = lineText.match(/^(\s*)/);
+
+      if (match && match[1]) {
+          const leadingWhitespace = match[1];
+
+          // Calculate indentation level based on the tab size
+          let indentLevel = 0;
+          for (let i = 0; i < leadingWhitespace.length; i++) {
+              if (leadingWhitespace[i] === '\t') {
+                  indentLevel += 1;
+              } else if (leadingWhitespace[i] === ' ') {
+                  indentLevel += 1 / effectiveTabSize;
+              }
+          }
+          return indentLevel;
+      }
+
+      return 0;
+  }
+	// private getIndentLevel(lineText: string): number {
+  //       // Get the user's indentation settings
+  //       const editorOptions = vscode.workspace.getConfiguration('editor');
+  //       const tabSize = editorOptions.get<number>('tabSize', 4); // Default to 4 if not set
+  //       const insertSpaces = editorOptions.get<boolean>('insertSpaces', true); // Default to true if not set
+
+  //       // Match the leading whitespace
+  //       const match = lineText.match(/^(\s*)/);
+  //       if (match && match[1]) {
+  //           const leadingWhitespace = match[1];
+
+  //           if (insertSpaces) {
+  //               // If using spaces, divide the number of spaces by the tab size
+  //               return leadingWhitespace.length / tabSize;
+  //           } else {
+  //               // If using tabs, count the number of tab characters
+  //               return leadingWhitespace.split('\t').length - 1;
+  //           }
+  //       }
+
+  //       return 0;
+  //   }
 	
 	private getTopLevelKey(document: vscode.TextDocument, currentLine: number): string | null {
         for (let i = currentLine - 1; i >= 0; i--) {
@@ -1015,17 +1087,111 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
 }
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
+
+class YamlHoverProvider implements vscode.HoverProvider {
+    provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Hover> {
+        const range = document.getWordRangeAtPosition(position);
+        const word = document.getText(range);
+
+        // Provide hover information based on the word (key)
+        if (word === 'name:') {
+			const hoverContent = new vscode.MarkdownString();
+			hoverContent.appendMarkdown("**name**: if it's the name of data source or destination:\n\n");
+            hoverContent.appendMarkdown("- Type: `string`, required \n\n");
+            hoverContent.appendMarkdown("- Usage:  \n\n");
+            hoverContent.appendMarkdown("  - For delta table / file system, it's the relative path of mounting \n\n");
+            hoverContent.appendMarkdown("  - For relational database, it's the <schema>.<table> \n\n");
+            hoverContent.appendMarkdown("  - For event hub, it's the name of event hub \n\n");
+            hoverContent.appendMarkdown("  - For kafka, it's the name of kafka topic \n\n");
+            hoverContent.appendMarkdown("  - For http, it's the url path of http (based on the endpoint) \n\n\n\n");
+            hoverContent.appendMarkdown("**name**: if it's the name defined under job_def. It's the data pipeline name with '/' is replace by '.' .\n\n");
+            hoverContent.appendMarkdown("- Type: `string`, required \n\n");
+
+			hoverContent.isTrusted = true; // Allow command links and other features
+            return new vscode.Hover(hoverContent);
+        }
+        if (word === 'layer:') {
+            const hoverContent = new vscode.MarkdownString();
+            hoverContent.appendMarkdown("**layer**: Define the layer of your data pipeline. \n\n");
+            hoverContent.appendMarkdown("- Type: `string`, required \n\n");
+            hoverContent.appendMarkdown("- Allowed values: `raw`, `bronze`, `silver`, `gold`, `external` \n\n");
+            hoverContent.appendMarkdown("- Usage: \n\n");
+            hoverContent.appendMarkdown("  - `external`: the external data layer, the data is not processed \n\n");
+            hoverContent.appendMarkdown("  - `raw`: the raw data layer, the data is not processed, just copied from external \n\n");
+            hoverContent.appendMarkdown("  - `bronze`: the bronze data layer, the data is processed but not aggregated \n\n");
+            hoverContent.appendMarkdown("  - `silver`: the silver data layer, the data is processed, joined, and aggregated \n\n");
+            hoverContent.appendMarkdown("  - `gold`: the gold data layer, the data is processed, aggregated and ready for consumption \n\n");
+            hoverContent.isTrusted = true; // Allow command links and other features
+            return new vscode.Hover(hoverContent);
+        } 
+
+        if (word === 'format:') {
+			const hoverText = 
+			"**format**: Define the format of data pipeline data source and destination.\n\n" +
+			"- Type: `string`, required\n\n" +
+			"- Allowed values:\n\n" +
+			"  - `delta`: delta table. Across all layers\n\n" +
+			"  - `csv`: csv file. Usually mapping to `external` layer.\n\n" +
+			"  - `json`: json file. Usually mapping to `external` layer.\n\n" +
+			"  - `parquet`: parquet file. Usually mapping to `external` layer.\n\n" +
+			"  - `avro`: avro file. Usually mapping to `external` layer.\n\n" +
+			"  - `binary`: binary file. Usually for http endpoint to get file binary content\n\n" +
+			"  - `binary_body`: Usually for http endpoint. It's used to get files related metadata like file_extension, folder, file_name etc.\n\n" +
+			"  - `xml`: xml file. Usually mapping to `external` layer.\n\n" +
+			"  - `xlsx`: xlsx file. Usually mapping to `external` layer, with `engine: pandas`\n\n" +
+			"  - `db2`: db2 table. Usually mapping to `external` layer.\n\n" +
+			"  - `samba`: samba file. Usually mapping to `external` layer.\n\n" +
+			"  - `unity_catalog`: unity catalog table or view. Usually used in `source` section\n\n" +
+			"  - `query`: Databricks sql query result\n\n" +
+			"  - `view`: view built in Databricks\n\n" +
+			"  - `jdbc_sqlserver`: sql server table. Usually mapping to `external` layer.\n\n" +
+			"  - `jdbc_synapse`: synapse table. Usually mapping to `external` layer.\n\n" +
+			"  - `jdbc_oracle`: oracle table. Usually mapping to `external` layer.\n\n" +
+			"  - `jdbc_mysql`: mysql table. Usually mapping to `external` layer.\n\n";
+		
+		const hoverContent = new vscode.MarkdownString();
+		hoverContent.appendMarkdown(hoverText);
+		hoverContent.isTrusted = true; // Allow command links and other features
+		return new vscode.Hover(hoverContent);
+		
+
+        }
+        if (word === 'engine:') {
+			const hoverText = 
+			"**engine**: Define the engine of data pipeline data source and destination.\n\n" +
+			"- Type: `string`, required\n\n" +
+			"- Allowed values:\n\n" +
+			"  - `spark`: spark engine. The default engine\n\n" +
+			"  - `python`: python engine. Usually used in `source` section\n\n" +
+			"  - `sql_tracker`: sql tracker engine. Usually used in `source` section\n\n" +
+			"  - `pandas`: pandas engine. Usually used in `source` section when format is `binary_body`\n\n" +
+			"  - `requests`: requests engine. Usually used in `source` section where source endpoint is http (api)\n\n";
+
+			const hoverContent = new vscode.MarkdownString();
+            hoverContent.appendMarkdown(hoverText);
+            hoverContent.isTrusted = true; // Allow command links and other features
+            return new vscode.Hover(hoverContent);
+
+        }
+
+        return undefined; // Return undefined if no hover information is available
+    }
+}
+
+
 export function activate(context: vscode.ExtensionContext) {
     console.log('Congratulations, your extension "ara-yaml-assist" is now active!');
 
     // Register the completion item provider for YAML files
-    const provider = vscode.languages.registerCompletionItemProvider(
+    const completionProvider = vscode.languages.registerCompletionItemProvider(
         'yaml', // Use 'yaml' if you're targeting all YAML files
         new AraYamlCompletionItemProvider(), 
         ' ' // Trigger on space
     );
+	const hoverProvider = vscode.languages.registerHoverProvider('yaml', new YamlHoverProvider());
+    context.subscriptions.push(completionProvider);
+	context.subscriptions.push(hoverProvider);
 
-    context.subscriptions.push(provider);
 }
 
 
