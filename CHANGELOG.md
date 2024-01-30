@@ -19,6 +19,12 @@ All notable changes to the "ara-yaml-assist" extension will be documented in thi
 ## 0.0.5 - 2023-01-24
 - Fix some data type prompts
 
-## 0.0.6 - 2023-01-24
+## 0.0.6 - 2023-01-28
 - Add the support to get the current vs editor settings on tabs/spaces (not fixed on 2 spaces)
 - Add hover over framework and a few hover description test
+
+## 0.0.7 - 2023-01-29
+- Add common keys' hover description
+
+## 0.0.8 - 2023-01-30
+- Fix some bugs in hover description

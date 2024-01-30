@@ -36,4 +36,4 @@ This extension is licensed under the [MIT License](https://www.mit.edu/~amini/LI
 
 ## Support
 
-If you encounter any issues or have suggestions for improvements, please submit an issue on our [GitHub repository](https://github.com/ForestAvanade/ara-yaml-assist).
+If you encounter any issues or have suggestions for improvements, please contact [me](mailto:forest.jinying.deng@avanade.com).

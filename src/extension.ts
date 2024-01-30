@@ -1104,7 +1104,7 @@ class YamlHoverProvider implements vscode.HoverProvider {
             hoverContent.appendMarkdown("  - For event hub, it's the name of event hub \n\n");
             hoverContent.appendMarkdown("  - For kafka, it's the name of kafka topic \n\n");
             hoverContent.appendMarkdown("  - For http, it's the url path of http (based on the endpoint) \n\n\n\n");
-            hoverContent.appendMarkdown("**name**: if it's the name defined under job_def. It's the data pipeline name with '/' is replace by '.' .\n\n");
+            hoverContent.appendMarkdown("**name**: if it's the name defined under job_def. It's the data pipeline base name (without path) with '/' is replace by '.' like `flights` .\n\n");
             hoverContent.appendMarkdown("- Type: `string`, required \n\n");
 
 			hoverContent.isTrusted = true; // Allow command links and other features
@@ -1114,7 +1114,7 @@ class YamlHoverProvider implements vscode.HoverProvider {
             const hoverContent = new vscode.MarkdownString();
             hoverContent.appendMarkdown("**layer**: Define the layer of your data pipeline. \n\n");
             hoverContent.appendMarkdown("- Type: `string`, required \n\n");
-            hoverContent.appendMarkdown("- Allowed values: `raw`, `bronze`, `silver`, `gold`, `external` \n\n");
+            hoverContent.appendMarkdown("- Suggested values: `raw`, `bronze`, `silver`, `gold`, `external`. Users can choose the layer names they liked. \n\n");
             hoverContent.appendMarkdown("- Usage: \n\n");
             hoverContent.appendMarkdown("  - `external`: the external data layer, the data is not processed \n\n");
             hoverContent.appendMarkdown("  - `raw`: the raw data layer, the data is not processed, just copied from external \n\n");
@@ -1148,36 +1148,577 @@ class YamlHoverProvider implements vscode.HoverProvider {
 			"  - `jdbc_synapse`: synapse table. Usually mapping to `external` layer.\n\n" +
 			"  - `jdbc_oracle`: oracle table. Usually mapping to `external` layer.\n\n" +
 			"  - `jdbc_mysql`: mysql table. Usually mapping to `external` layer.\n\n";
-		
-		const hoverContent = new vscode.MarkdownString();
-		hoverContent.appendMarkdown(hoverText);
-		hoverContent.isTrusted = true; // Allow command links and other features
-		return new vscode.Hover(hoverContent);
-		
+			return(this.createHover(hoverText));
 
-        }
-        if (word === 'engine:') {
+		} else if (word === 'engine:') {
 			const hoverText = 
-			"**engine**: Define the engine of data pipeline data source and destination.\n\n" +
-			"- Type: `string`, required\n\n" +
+			"**engine**: Define the engine of data pipeline data source and destination. And if transformations are required, the engine must be `spark`. \n\n" +
+			"- Type: `string`, optional\n\n" +
 			"- Allowed values:\n\n" +
 			"  - `spark`: spark engine. The default engine\n\n" +
-			"  - `python`: python engine. Usually used in `source` section\n\n" +
-			"  - `sql_tracker`: sql tracker engine. Usually used in `source` section\n\n" +
+			"  - `python`: python engine (not a valid value in ara). It doesn't need to be specified if it needs to be used. Ara will get `core_engine` from context and do the justification by its own \n\n" +
+			"  - `sql_tracker`: sql tracker engine, and only valid on `source` - `jdbc_sqlserver`, `jdbc_oracle` and `jdbc_synapse` when `query` and `exec` not used. \n\n" +
 			"  - `pandas`: pandas engine. Usually used in `source` section when format is `binary_body`\n\n" +
-			"  - `requests`: requests engine. Usually used in `source` section where source endpoint is http (api)\n\n";
+			"  - `requests`: requests engine. Usually used in `source` section where source endpoint is http (api)\n\n" +
+			"     - example: \n\n" +
+			"       ```yaml\n\n" +
+			"       batch_reader:\n\n" +
+			"         layer: external\n\n" +
+			"         endpoint: api-weather\n\n" +
+			"         format: binary_body\n\n" +
+			"         name: '/data/2.5/onecall?lat={lat}&lon={lon}&appid={kv_apikey}'\n\n" +
+			"         engine: requests\n\n" +
+			"         requests:\n\n" +
+			"           dynamic_parameters:\n\n" +
+			"             sqlQuery: \n\n" +
+			"               select lat, lon from location_list2\n\n" +
+			"        ```";
+			return(this.createHover(hoverText));
 
-			const hoverContent = new vscode.MarkdownString();
-            hoverContent.appendMarkdown(hoverText);
-            hoverContent.isTrusted = true; // Allow command links and other features
-            return new vscode.Hover(hoverContent);
+        } else if (word === 'endpoint:') {
+			const hoverText =
+			"**endpoint**: Define the endpoint of data pipeline data source and destination. It's required if the endpoint is not the default one in the layer. \n\n" +
+			"- Type: `string`, optional\n\n" +
+			"- values: they are defined on `/endpoints/` folder. \n\n" +
+			"- how to fetch the checkpoints: \n\n" +
+			"  ```python\n\n" +
+			"  from ara.common.Configuration import Configuration\n\n" +
+			"  eps = Configuration.get_endpoints()\n\n" +
+			"  ep = Configuration.get_endpoint('endpoint_name')\n\n" +
+			"  ```\n\n";
+			return(this.createHover(hoverText));
 
-        }
+		} else if (word === 'increment_method:') {
+			const hoverText =
+			"**increment_method**: Define the increment method of data pipeline data source. \n\n" +
+			"- Type: `string`, optional\n\n" +
+			"- Allowed values: \n\n" +
+			"  - `full_load`: load full records from a table of jdbc_sqlserver, jdbc_oracle, jdbc_mysql, and jdbc_synapse type. \n\n" +
+			"  - `full_dataset`: load full dataset from a table of delta, db2, saleforce, and unity_catalog type. \n\n" +
+			"  - `new_records`: load new/changed records from all sources except auto loader. \n\n" +
+			"  - `new_files`: load new files from auto loader. \n\n" +
+			"- For delta table, if `increment_method` is not specified, Ara will generate the following views in data processing: " +
+			"  - `<name of source>__all` - all records (as for `increment_method: full_dataset`) \n\n" +
+			"  - `<name of source>__all_partitions` - all partitions \n\n" +
+			"  - `<name of source>__changed_records` - changed records (as for `increment_method: new_records`) \n\n" +
+			"  - `<name of source>__changed_partitions` - changed partitions (as for `increment_method: new_partitions`) \n\n";
+			return(this.createHover(hoverText));
+		
+		} else if (word === 'preprocess_functions:') {
+			const hoverText =
+			"**preprocess_functions**: Define the preprocess functions in data source. \n\n" +
+			"- Type: `list`, optional\n\n" +
+			"- values: \n\n" +
+			"  - preprocess function name if the function only has one parameter df (dataframe). e.g. function_1(df) \n\n" +
+			"  - preprocess function name and 5 parameters if the function has more than one parameter. e.g. function_2(df, src_name, src_def, self_obj, args) \n\n" +
+			"- example: \n\n" +
+			"  ```yaml\n\n" +
+			"  source:\n\n" +
+			"    src:\n\n" +
+			"      batch_reader:\n\n" +
+			"        ...\n\n" +
+			"        preprocess_functions: ['function1', {'function2':{'arg1': 2, 'arg2': 3}}]\n\n" +
+			"  ```";
+			return(this.createHover(hoverText));
+		
+		} else if (word === 'tracking_column:') {
+			const hoverText =
+			"**tracking_column**: Define the tracking column of data source in order to get incremental records. It is needed when you use `new_records` in `increment_method` and `format` is not `delta` \n\n" +
+			"default tracking column type is `timestamp`, you can use `timestamp`, `decimal`, `int`, `binary` and `string` \n\n" +
+			"- Type: `string`, optional\n\n" +
+			"- Allowed values: \n\n" +
+			"  - column name of the data source. \n\n" +
+			"- example: \n\n" +
+			"  ```yaml\n\n" +
+			"  source:\n\n" +
+			"    src:\n\n" +
+			"      batch_reader:\n\n" +
+			"        format: jdbc_oracle \n\n" +
+			"		 increment_method: new records\n\n" +
+			"        tracking_column: last_updated\n\n" +
+			"  ```";
+			return(this.createHover(hoverText));
+		
+		} else if (word === 'tracking_column_expr:') {
+			const hoverText =
+			"**tracking_column_expr**: Define the tracking column expression of data source. It is needed when no current columns can take tracking_column role. \n\n" +
+			"- Type: `string`, optional\n\n" +
+			"- Allowed values: \n\n" +
+			"  - spark sql column expression. \n\n" +
+			"- example: \n\n" +
+			"  ```yaml\n\n" +
+			"  source:\n\n" +
+			"    src:\n\n" +
+			"      batch_reader:\n\n" +
+			"        format: jdbc_sqlserver \n\n" +
+			"		 increment_method: new records\n\n" +
+			"        tracking_column_expr: cast(last_updated as date)\n\n" +
+			"        ... \n\n" +
+			"  ```";
+			return(this.createHover(hoverText));
+	
+		} else if (word === 'write_mode:') {
+			const hoverText =
+			"**write_mode**: Define the write mode of data destination. \n\n" +
+			"- Type: `string`, required\n\n" +
+			"- Allowed values: \n\n" +
+			"  - `overwrite`: overwrite the existing data. Valid for files, jdbc_sqlserver, jdbc_synapse and jdbc_oracle \n\n" +
+			"  - `append`: append to the existing data. Valid for all data format \n\n" +
+			"  - `replace_partitions`: replace the existing partitions. This is only valid when the destination is file. \n\n" +
+			"  - `replace`: `marked` the existing data matched as deleted and replace (upsert) them with the new/changed data. Valid for delta table \n\n" +
+			"  - `upsert`: Valid for delta, jdbc_sqlserver, jdbc_sysnpase, and jdbc_oracle \n\n" +
+			"  - `scd_technical_events_dedupe`: scd support. scd processing with incoming data deduplication by `primary_key` and `event_order`. Valid for delta table \n\n" +
+			"  - `scd_technical_events`: scd support. scd processing without incoming data deduplication. Valid for delta table \n\n";
+			
+			return(this.createHover(hoverText));
+		} else if (word === 'pk_violations_handling_action:'){
+			const hoverText =
+			"**pk_violations_handling_action**: Define the primary key violations handling action of data destination. \n\n" +
+			"- Type: `string`, optional. It's required if write_mode is `upsert`, `replace`\n\n" +
+			"- Allowed values: \n\n" +
+			"  - `pickone`: pick one record from the duplicated records. \n\n" +
+			"  - `error`, `fail`, `throw`: raise error when there are duplicated records. \n\n" +
+			"  - `reject`: reject all duplicated records. \n\n" +
+			"default value is `error` \n\n";
+			return(this.createHover(hoverText));
+
+		} else if (word === 'scope_key:') {
+			const hoverText =
+			"**scope_key**: Define the scope key of data destination. It is supposed to use when `write_mode` is `replace`, or `write_mode` is `scd_technical_events` or `scd_technical_events_dedupe` \n\n" +
+			"- Type: `list`, optional\n\n" +
+			"- Allowed values: \n\n" +
+			"  - column names of the data destination. \n\n" +
+			"- example: \n\n" +
+			"  ```yaml\n\n" +
+			"  destination:\n\n" +
+			"    dest:\n\n" +
+			"      ...\n\n" +
+			"      format: delta \n\n" +
+			"	   write_mode: replace\n\n" +
+			"	   primary_key: [id, name, org]\n\n" +
+			"      scope_key: [id, name]\n\n" +
+			"  ```";
+			return(this.createHover(hoverText));
+		} else if (word === 'scd_excluded_comparison_columns:'){
+			const hoverText =
+			"**scd_excluded_comparison_columns**:  Lists the columns to be excluded when comparing the incoming data frame (df) with the target df during the SCD process. Ara can compare the incoming data with the target data to avoid unnecessary updates. For example, if the incoming data is identical to the target data, there is no need to update the target data. This option allows you to exclude columns from the comparison process. It is supposed to use when `write_mode` is `scd_technical_events` or `scd_technical_events_dedupe` \n\n" +
+			"- Type: `list`, optional\n\n";
+
+			return(this.createHover(hoverText));
+
+		} else if (word === 'scd_excluded_dedup_comparison_cols:'){
+			const hoverText =
+			"**scd_excluded_dedup_comparison_cols**: Lists of the columns to be execluded when doing deduplication on the incoming data frame (df). With this parameter, users can now easily omit specific columns from their data during the Slowly Changing Dimension (SCD) deduplication process. This enhancement is applicable only when using the scd_excluded_dedup_comparison_cols write mode. (Notes: this parameter is only available in ara `1.3.2` and above). It is supposed to use when `write_mode` is `scd_technical_events_dedupe` \n\n" +
+			"- Type: `list`, optional\n\n";
+			return(this.createHover(hoverText));
+
+		} else if (word === 'valid_from:') {
+			const hoverText =
+			"**valid_from**: Specifies the column name that represents the starting validity timestamp of a record in data destination. column type can be `date` or `timestamp`. It is supposed to use when `write_mode` is `scd_technical_events` or `scd_technical_events_dedupe` \n\n" +
+			"- Type: `string`, optional\n\n";
+			return(this.createHover(hoverText));
+		} else if (word === 'valid_to:') {
+			const hoverText =
+			"**valid_to**: Specifies the column name that represents the ending validity timestamp of a record in data destination. column type can be `date` or `timestamp`. It is supposed to use when `write_mode` is `scd_technical_events` or `scd_technical_events_dedupe` \n\n" +
+			"- Type: `string`, optional\n\n";
+			return(this.createHover(hoverText));
+		} else if (word === 'valid_to_open_end_value:') {
+			const hoverText =
+			"**valid_to_open_end_value**: If not set, the latest valid_to column value defaults to null. To assign a specific value (e.g., '9999-12-31') to open-ended records, define it here. It is supposed to use when `write_mode` is `scd_technical_events` or `scd_technical_events_dedupe` \n\n" +
+			"- Type: `string`, optional\n\n";
+			return(this.createHover(hoverText));
+		} else if (word === 'valid_to_offset:') {
+			const hoverText =
+			"**valid_to_offset**: Defines the offset for the valid_to date (days) / timestamp (seconds). The default value is 0. It is supposed to use when `write_mode` is `scd_technical_events` or `scd_technical_events_dedupe` \n\n" +
+			"- Type: `bigint`, optional\n\n";
+			return(this.createHover(hoverText));
+		} else if (word === 'job_def:') {
+			const hoverText =
+			"**job_def**: Define the job definition of data pipeline including `namespace` and `name`. \n\n" +
+			"- Type: `struct`, optional\n\n" +
+			"- Structure: \n\n" +
+			"  - `namespace`: the namespace of the job definition. It's the data pipeline path folder with `/` replaced by `.` without `pipeline.` like `raw.avair` \n\n" +
+			"  - `name`: the name of the job definition. It's the data pipeline name with `/` replaced by `.` like `flights` \n\n";
+			return(this.createHover(hoverText));
+
+		} else if (word === 'data_quality_thresholds:') {
+			const hoverText =
+			"**data_quality_thresholds**: Define the data quality thresholds of data pipeline. Currently it can't be disabled. \n\n" +
+			"- Type: `struct`, optional\n\n" +
+			"- Structure: \n\n" +
+			"  - `max_defect_perc` \n\n" +
+			"  - `max_defect_row_count` \n\n" +
+			"  - `max_defects_logged_on_exception` \n\n" +
+			"  - `max_defects_logged`";
+			return(this.createHover(hoverText));
+
+		} else if (word === 'max_defect_perc:'){
+			const hoverText =
+			"**max_defect_perc**: Define the maximum defect percentage of data pipeline. (default value: 100, calculation: `inNullCheckRejectedCount/inRecordCount * 100  & outNullCheckRejectedCount / (inRecordCount - inNullCheckRejectedCount )`\n\n" +
+			"- Type: `bigint`, optional\n\n";
+			return(this.createHover(hoverText));
+			
+		} else if (word === 'max_defect_row_count:'){
+			const hoverText =
+			"**max_defect_row_count**: Define the maximum defect row count of data pipeline. (default value: -1, (default value: -1 [means no limit], calculation: `inNullCheckRejectedCount & outNullCheckRejectedCount` ))\n\n" +
+			"- Type: `bigint`, optional\n\n";
+			return(this.createHover(hoverText));
+
+		} else if (word === 'max_defects_logged_on_exception:'){
+			const hoverText =
+			"**max_defects_logged_on_exception**: Define the maximum defects logged on exception of data pipeline. (default value: 100)\n\n" +
+			"- Type: `bigint`, optional\n\n";
+			return(this.createHover(hoverText));
+			
+		} else if (word === 'max_defects_logged:'){
+			const hoverText =
+			"**max_defects_logged**: Define the maximum defects logged of data pipeline. (default value: -1)\n\n" +
+			"- Type: `bigint`, optional\n\n";
+			return(this.createHover(hoverText));
+
+		} else if (word === 'core_engine:'){
+			const hoverText = 
+			"**core_engine**: Define the core engine of data pipeline. \n\n" +
+			"- Most Ara sources require spark engine \n\n " +
+			"- The data sources required python engine include: sql server stream (`StreamReaderSqlServer`), web socket stream (`StreamReaderWebSocket`) \n\n" +
+			"- The data sources you can select to use spark or python engine: eventHub destination \n\n" + 
+			"- Type: `string`, optional\n\n" +
+			"- Allowed values: \n\n" +
+			"  - `spark`: spark engine. The default engine\n\n" +
+			"  - `python`: python engine. \n\n";
+			return(this.createHover(hoverText));
+
+		} else if (word === 'streaming:'){
+			const hoverText = 
+			"**streaming**: Define the streaming property of a stream data pipeline. \n\n" +
+			"- Type: `struct`, optional\n\n" +
+			"- Structure: \n\n" +
+			"  - `enabled` \n\n" +
+			"  - `trigger_interval` \n\n" +
+			"  - `trigger_type` \n\n";
+			return(this.createHover(hoverText));
+
+		} else if( word === 'checkpoint_strategy:'){ 
+			const hoverText =
+			"**checkpoint_strategy**: Define the checkpoint strategy of a data pipeline. \n\n" +
+			"- Type: `string`, optional\n\n" +
+			"- Default value: `delta_checkpoint`\n\n" +
+			"- Allowed values: \n\n" +
+			"  - `delta_checkpoint`: use delta checkpoint. Persist data to a tempoary delta table when reading or transform data. \n\n" +
+			"  - `local_checkpoint`: use local checkpoint. Persist data to a local folder when reading or transform data (good for small data volume). \n\n" +
+			"  - `cache`: use cache. Persist data to memory when reading or transform data. \n\n" +
+			"  - `disabled`: no checkpoint. \n\n";
+			return(this.createHover(hoverText));
+
+		} else if (word === 'dependency:'){ 
+			const hoverText =
+			"**dependency**: Set a data pipeline trigger as dependency or not. \n\n" +
+			"- Type: `boolean`, optional\n\n" +
+			"- Default value: `none`\n\n" +
+			"- Allowed values: \n\n" +
+			"  - `true`: set the data pipeline trigger as dependency. \n\n" +
+			"  - `false`: not set the data pipeline trigger as dependency. \n\n";
+			return(this.createHover(hoverText));
+		} else if (word === 'run_mode:'){
+			const hoverText =
+			"**run_mode**: Define the run mode of a data pipeline. \n\n" +
+			"- Type: `string`, optional\n\n" +
+			"- Default value: `job`\n\n" +
+			"- Allowed values: \n\n" +
+			"  - `job`: run as a job (create job in Databricks workspace). \n\n" +
+			"  - `notebook`: run as a notebook. \n\n";
+			return(this.createHover(hoverText));
+		} else if (word === 'cron:'){
+			const hoverText =
+			"**cron**: Define the cron trigger of a data pipeline. \n\n" +
+			"- Type: `string` or `list`, optional\n\n" +
+			"- example: \n\n" +
+			"  ```yaml\n\n" +
+			"  - cron: '* * * * *'\n\n" +
+			"  - cron: \n\n" +
+			"    - minute: '*/5'\n\n" +
+			"    - hour: '*'\n\n" +
+			"    - day_of_month: '*'\n\n" +
+			"    - month: '*'\n\n" +
+			"    - day_of_week: '*'\n\n" +
+			"  ```";
+			return(this.createHover(hoverText));
+		} else if (word === 'cluster_spec:'){
+			const hoverText =
+			"**cluster_spec**: Define the cluster spec of a data pipeline. \n\n" +
+			"- Type: `struct`, optional\n\n" +
+			"- Structure: \n\n" +
+			"  - `existing_cluster` str(required=False)\n\n" +
+			"  - `existing_cluster_id` str(required=False)\n\n" +
+			"  - `instance_pool_name` str(required=False)\n\n" +
+			"  - `node_type_id` str(required=False)\n\n" +
+			"  - `num_workers` int(min=0, required=False)\n\n" +
+			"  - `autoscale` include('autoscale', required=False)\n\n" +
+			"    - `min_workers` int(min=0, required=True)\n\n" +
+			"    - `max_workers` int(min=0, required=True)\n\n" +
+			"  - `spark_conf` map(str, required=False)\n\n" +
+			"- example: \n\n" +
+			"  ```yaml\n\n" +
+			"  cluster_spec:\n\n" +
+			"    instance_pool_name: E8_10.4\n\n" +
+			"    num_workers: !param [num_workers, 0]\n\n" +
+			"    spark_conf: !load_yaml generic-spark-conf\n\n";
+			return(this.createHover(hoverText));
+
+		} else if (word === 'enabled:'){
+			const hoverText = 
+			"**enabled**: Define whether the configuration is enabled or not. If it's necessary to have `enabled` value if it's under `streaming` configuration for streaming data pipeline \n\n" +
+			"- Type: `boolean`, optional\n\n" +
+			"- Allowed values: \n\n" +
+			"  - `true`: enabled\n\n" +
+			"  - `false`: disabled\n\n";
+			return(this.createHover(hoverText));
+
+		} else if (word === 'trigger_interval:'){
+			const hoverText =
+			"**trigger_interval**: specify the time interval that databricks will check the source streaming data (unit: second). \n\n" +
+			"- Type: `int`, optional\n\n";
+			return(this.createHover(hoverText));
+
+		} else if (word === 'trigger_type:'){
+			const hoverText =
+			"**trigger_type**: specify the trigger type that databricks will check the source streaming data. \n\n" +
+			"- Type: `string`, optional\n\n" +
+			"- Allowed values: \n\n" +
+			"  - `once`: only check once\n\n" +
+			"  - `interval`: check continuously with interval \n\n" +
+			"  - `available_now`: check the available now data once with auto optimized batches\n\n";
+			return(this.createHover(hoverText));
+
+		} else if (word === 'scheduler:'){
+			const hoverText =
+			"**scheduler**: Define the scheduler property of a batch data pipeline. \n\n" +
+			"- Type: `struct`, optional\n\n" +
+			"- Structure: \n\n" +
+			"  - `timezone` \n\n" +
+			"  - `timezone_enabled` \n\n" +
+			"  - `cluster_spec`\n\n";
+			"  - `run_mode` \n\n";
+			return(this.createHover(hoverText));
+
+		} else if (word === 'from:') {
+			const hoverText =
+			"**from**: Defines the source dataset for operations. \n\n" +
+			"- Type: `string`, single value\n\n" +
+			"- Default value if not defined: `default`\n\n" +
+			"- Defines the name of the dataset (spark's temp view) that will be used as a source of operations defined in a block\n\n" +
+			"- Dependencies: when defined, `into` must be defined too\n\n";
+			return(this.createHover(hoverText));
+
+		} else if (word === 'into:') {
+			const hoverText ="**into**: Sets the destination dataset for operations, replacing existing content if necessary. \n\n" +
+			"- Type: `string`, single value\n\n" +
+			"- Default value if not defined: `default`\n\n" +
+			"- Defines the name of the dataset (spark's temp view) that will be used as a destination of operations defined in a block\n\n" +
+			"- Dependencies: when defined, `from` must be defined too\n\n";
+			return(this.createHover(hoverText));
+
+		} else if (word === 'inStructureType:') {
+			const hoverText ="**inStructureType**: Specifies the structure type of data (flat, nested, root). \n\n" +
+			"- Type: `string`, single value\n\n" +
+			"- Default value if not defined: `Attribute`\n\n" +
+			"- Defines a structure type of flat, or nested object. Possible values are: `Attribute`, `Array`, `Root`\n\n";
+			return(this.createHover(hoverText));
+
+		} else if (word === 'inColumnOrder:') {
+			const hoverText =
+			"**inColumnOrder**: Defines the order of input columns for schema construction. \n\n" +
+			"- Type: `int`, `string` value\n\n" +
+			"- Default value if not defined: `0`\n\n" +
+			"- Represents the input column order, sorting is stable\n\n";
+			return(this.createHover(hoverText));
+		} else if (word === 'inColumn:') {
+			const hoverText =
+			"**inColumn**: Names the input column for schema creation. \n\n" +
+			"- Type: `str`, single value\n\n" +
+			"- Default value: not defined\n\n" +
+			"- The name of the input column, that will be used in schema creation\n\n" +
+			"- Dependencies: `from` represent the source dataset, when defined, `inDataType` must be defined too\n\n";
+			return(this.createHover(hoverText));
+		} else if (word === 'inDataType:') {
+			const hoverText =
+			"**inDataType**: Determines the datatype of the input column. \n\n" +
+			"- Type: `str`\n\n" +
+			"- Default value: not defined\n\n" +
+			"- The datatype of the input column defined in `inColumn`. If unknown, or non deterministic, put `string` as all datatypes can be reflected as strings\n\n" +
+			"- Dependencies: when defined, `inColumn` must be defined too\n\n";
+			return(this.createHover(hoverText));
+
+		} else if (word === 'outColumnOrder:') {
+			const hoverText =
+			"**outColumnOrder**: Specifies the output column order in the final transformed object. \n\n" +
+			"- Type: `int`, single value\n\n" +
+			"- Represents the order of column specified when transformation created final output object. Sorting algorithm is stable\n\n" +
+			"- Dependencies: when defined, the `outColumn` must be defined too\n\n";
+			return(this.createHover(hoverText));
+		} else if (word === 'outColumn:') {
+			const hoverText =
+			"**outColumn**: Names the output column. \n\n" +
+			"- Type: `str`, single value\n\n" +
+			"- Default value: not defined\n\n" +
+			"- The name of the output column.\n\n" +
+			"- Dependencies: `into` represent the destination dataset, when defined, the `outDataType` must be defined too\n\n";
+			return(this.createHover(hoverText));
+		} else if (word === 'outDataType:') {
+			const hoverText =
+			"**outDataType**: Sets the datatype for the output column. \n\n" +
+			"- Type: `str`, single value\n\n" +
+			"- Default value: not defined\n\n" +
+			"- Determines the spark's datatype used to cast value from `inColumn` or any of the expressions\n\n" +
+			"- Dependencies: when defined, the `outColumn` must be defined too\n\n";
+			return(this.createHover(hoverText));
+
+		} else if (word === 'expression:') {
+			const hoverText =
+			"**expression**: Defines a pyspark expression to be executed. \n\n" +
+			"- Type: `str`, single value\n\n" +
+			"- Default value: not defined\n\n" +
+			"- A pyspark expression that should be executed on dataframe's that are defined by `into` and `from`\n\n" +
+			"- Dependencies: `from` and `into` represent the source and destination datasets, in case it's not `.` expression: `outColumn` represents the column to which the expression will be written to, cannot be used together with `expr` or `sqlExpression` or `sqlExpr`\n\n";
+			return(this.createHover(hoverText));
+		} else if (word === 'expr:') {
+			const hoverText =
+			"**expr**: Alias for `expression`. Defines a pyspark expression to be executed. \n\n" +
+			"- Type: `str`, single value\n\n" +
+			"- Default value: not defined\n\n" +
+			"- A pyspark expression that should be executed on dataframe's that are defined by `into` and `from`\n\n" +
+			"- Dependencies: `from` and `into` represent the source and destination datasets, in case it's not `.` expression: `outColumn` represents the column to which the expression will be written to, cannot be used together with `expression` or `sqlExpression` or `sqlExpr`\n\n";
+			return(this.createHover(hoverText));
+		} else if (word === 'default:') {
+			const hoverText =
+			"**default**: Sets a default expression for NULL values in `outColumn`. \n\n" +
+			"- Type: `str`, single value\n\n" +
+			"- Default value: not defined\n\n" +
+			"- When defined, and when column behind `outColumn` is of NULL value, the pyspark's expression in `default` will be executed.\n\n" +
+			"- Dependencies: `from` and `into` represent the source and destination datasets, `outColumn` must be defined, cannot be used together with `sqlDefault`\n\n";
+			return(this.createHover(hoverText));
+		} else if (word === 'sqlExpression:') {
+			const hoverText =
+			"**sqlExpression**: Executes a Spark SQL expression for output. \n\n" +
+			"- Type: `str`, single value\n\n" +
+			"- Default value: not defined\n\n" +
+			"- Executes spark's sql expression, and places result scalar value in `outColumn`\n\n";
+			return(this.createHover(hoverText));
+		} else if (word === 'sqlExpr:') {
+			const hoverText =
+			"**sqlExpr**: Alias for `sqlExpression`. Executes a Spark SQL expression for output.\n\n" + 
+			"- Type: `str`, single value\n\n" +
+			"- Default value: not defined\n\n" +
+			"- Executes spark's sql expression, and places result scalar value in `outColumn`\n\n";
+			return(this.createHover(hoverText));
+		} else if (word === 'sqlDefault:') {
+			const hoverText = 
+			"**sqlDefault**: Sets a default SQL expression for NULL values in `outColumn`. \n\n" +
+			"- Type: `str`, single value\n\n" +
+			"- Behaves like `default`, except that it expect spark sql expression format instead of pyspark expression format\n\n" +
+			"- Dependencies: `from` and `into` represent the source and destination datasets, `outColumn` must be defined, cannot be used together with `default`\n\n";
+			return(this.createHover(hoverText));
+		} else if (word === 'description:') {
+			const hoverText =
+			"**description**: A text block for documenting operations or columns. \n\n" +
+			"- Type: `str`, single value\n\n" +
+			"- It does not have any technical meaning.\n\n";
+			return(this.createHover(hoverText));
+		} else if (word === 'outColumnSelection:') {
+			const hoverText =
+			"**outColumnSelection**: Defines which columns to select from the `from` dataset. \n\n" +
+			"- Type: `string` or list of strings\n\n" +
+			"- Value can be: `per_metadata`, `all`, `[ field1, field2, field3 ]`\n\n" +
+			"- Dependencies: `from` and `into` represent the source and destination datasets\n\n";
+			return(this.createHover(hoverText));
+
+		} else if (word === 'union:') {
+			const hoverText =
+			"**union**: Unions multiple datasets by column names. \n\n" +
+			"- Type: list of dataset names\n\n" +
+			"- Unions multiple datasets into one, datasets are unionid by column names, not by order.\n\n" +
+			"- Dependencies: `into` represent the destination dataset name\n\n";
+			return(this.createHover(hoverText));
+		} else if (word === 'unionDistinct:') {
+			const hoverText =
+			"**unionDistinct**: Behaves like `union` but removes duplicate rows. \n\n" +
+			"- Type: list of dataset names\n\n";
+			return(this.createHover(hoverText));
+		} else if (word === 'checkpoint:') {
+			const hoverText =
+			"**checkpoint**: Creates a dataset checkpoint. \n\n" +
+			"- Type: `name`\n\n" +
+			"- Creates a dataset checkpoint of given name.\n\n" +
+			"- Dependencies: `from`, `into` the dataset to checkpoint, both have to be same name\n\n";
+			return(this.createHover(hoverText));
+		} else if (word === 'sqlQuery:') {
+			const hoverText =
+			"**sqlQuery**: Executes a SQL query to build a dataset. \n\n" +
+			"- Type: `sql query`\n\n" +
+			"- Executes sql query that will be used to build dataset.\n\n" +
+			"- Dependencies: `into` represent the destination dataset name\n\n";
+			return(this.createHover(hoverText));
+		} else if (word === 'sqlDatasetSelector:') {
+			const hoverText =
+			"**sqlDatasetSelector**: Defines a SQL query for dataset selection based on priority. \n\n" +
+			"- Type: `sql query`\n\n" +
+			"- Defines sql query of schema: priority - integer, dataset_name - the name of datasets created by `into` command\n\n";
+			return(this.createHover(hoverText));
+		} else if (word === 'dataQualityCheck:') {
+			const hoverText =
+			"**dataQualityCheck**: Defines a data quality check. \n\n" +
+			"- Type: `dict`\n\n" +
+			"- Define data quality check. If the check fails, the pipeline will fail.\n\n";
+			return(this.createHover(hoverText));
+		} else if (word === 'batch_reader:') {
+			const hoverText =
+			"**batch_reader**: it defines the source is a batch source and Ara related batch reader will be used to read the data source. \n\n";
+			return(this.createHover(hoverText));
+		} else if (word === 'stream_reader:') {
+			const hoverText =
+			"**stream_reader**: it defines the source is a stream source and Ara related stream reader will be used to read the data source. \n\n";
+			return(this.createHover(hoverText));
+		} else if (word === 'settings:') {
+			const hoverText =
+			"**settings**: Define the context of data pipeline for running configurations, triggers, etc.. \n\n";
+			return(this.createHover(hoverText));
+		} else if (word === 'source:') {
+			const hoverText =
+			"**source**: Define the data sources of data pipeline. A source definitions that will initialize the `SourceComponent`. Each dictionary key has exactly one source definition section. Either of `batch_reader` or `stream_reader` type. Usually the name/key of the dictionary entry denotes the name of the dataset (a spark view in case we talk spark engine) that `SourceComponent` will create.\n\n";
+			return(this.createHover(hoverText));
+		} else if (word === 'destination:') {
+			const hoverText =
+			"**destination**: Define the data destinations of data pipeline. A destination defintions that will initialize the `DestinatonComponent`. Each dictionary key has exactly one destination definition, along with `write_mode` that should be performed, and accompanuing transformations (`upsert`, `append`, `overwrite`, `replace`, etc...) \n\n";
+			return(this.createHover(hoverText));
+		} else if (word === 'transformations:') {
+			const hoverText =
+			"**transformations**: Define the transformations of data pipeline. A list of transformations to be performed on one or more datasets. In case there is only only `source` defined, the transformations will assume that this is only one dataset, and will use it implicitly \n\n";
+			return(this.createHover(hoverText));
+		} else if (word === "schema_evolution_rules:") {
+			const hoverText =
+			"**schema_evolution_rules**: Define the schema evolution rules of data pipeline. This is only valid for delta table. \n\n" +
+			"- Type: `list`, optional\n\n" +
+			"- Allowed values: \n\n" +
+			"  - `allow_new_columns`: add a new column to the schema \n\n" +
+			"  - `allow_drop_columns`: drop a column from the schema (not implemented) \n\n" +
+			"  - `ignore_missing_columns`: ignore incoming data frame missing columns \n\n" +
+			"  - `allow_all_type_changes`: allow all data type changes \n\n" +
+			"  - `allow_safe_type_changes`: allow safe data type changes \n\n" +
+			"- notes: allow_all_type_changes depends on spark platform schema evolution support. Even you set allow_all_type_changes but most of unsafe type changes are not supported by Databricks directly, it will still fail. \n\n";
+			return(this.createHover(hoverText));
+		}
+
 
         return undefined; // Return undefined if no hover information is available
     }
-}
 
+	private createHover(hoverText: string): vscode.Hover {
+		const hoverContent = new vscode.MarkdownString();
+		hoverContent.appendMarkdown(hoverText);
+		hoverContent.isTrusted = true;
+		return new vscode.Hover(hoverContent);
+}
+}
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('Congratulations, your extension "ara-yaml-assist" is now active!');
