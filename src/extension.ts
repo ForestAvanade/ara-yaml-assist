@@ -29,6 +29,9 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
 				let destinationItem = new vscode.CompletionItem("destination:", vscode.CompletionItemKind.Keyword);
 				destinationItem.documentation = new vscode.MarkdownString("Ara data pipeline destination configurations");
 				suggestions.push(destinationItem);
+				let jobdefItem = new vscode.CompletionItem("job_def:", vscode.CompletionItemKind.Keyword);
+				jobdefItem.documentation = new vscode.MarkdownString("Ara data pipeline job definition");
+				suggestions.push(jobdefItem);
 			}
 			if (topLevelKey === "transformation") {
 				if (linePrefix.trim() === "") {
@@ -137,9 +140,9 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
 					checkpointStrategyItem.documentation = new vscode.MarkdownString("Define the checkpoint strategy for your data pipeline.");
 					suggestions.push(checkpointStrategyItem);
 
-					let jobdefItem = new vscode.CompletionItem("job_def:", vscode.CompletionItemKind.Property);
-					jobdefItem.documentation = new vscode.MarkdownString("Define the job definition for your data pipeline including `namespace` and `name`.");
-					suggestions.push(jobdefItem);
+					//let jobdefItem = new vscode.CompletionItem("job_def:", vscode.CompletionItemKind.Property);
+					//jobdefItem.documentation = new vscode.MarkdownString("Define the job definition for your data pipeline including `namespace` and `name`.");
+					//suggestions.push(jobdefItem);
 
 					let dataQualityCheckItem = new vscode.CompletionItem("data_quality_check:", vscode.CompletionItemKind.Property);
 					dataQualityCheckItem.documentation = new vscode.MarkdownString("Define the data quality check on data source level.");
@@ -162,6 +165,17 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
 					suggestions.push(new vscode.CompletionItem("cache", vscode.CompletionItemKind.Value));
 					suggestions.push(new vscode.CompletionItem("local_checkpoint", vscode.CompletionItemKind.Value));
 					suggestions.push(new vscode.CompletionItem("disabled", vscode.CompletionItemKind.Value));
+				}
+			}
+			else if (topLevelKey === "job_def") {
+				if (linePrefix.trim() === "") 
+				{
+					let namespaceItem = new vscode.CompletionItem("namespace:", vscode.CompletionItemKind.Property);
+					namespaceItem.documentation = new vscode.MarkdownString("Define the namespace for your data pipeline. <br> The default value is path of your data pipeline by replacing `/` to `.`.");
+					suggestions.push(namespaceItem);
+					let nameItem = new vscode.CompletionItem("name:", vscode.CompletionItemKind.Property);
+					nameItem.documentation = new vscode.MarkdownString("Define the name for your data pipeline. <br> The default value is the name of your base data pipeline by replacing `/` to `.`.");
+					suggestions.push(nameItem);
 				}
 			}
 			if (linePrefix.trim().endsWith("inDataType:") || linePrefix.trim().endsWith("outDataType:")) {
@@ -424,13 +438,6 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
 						let matchEnvItem = new vscode.CompletionItem("!match_env", vscode.CompletionItemKind.Property);
 						matchEnvItem.documentation = new vscode.MarkdownString("match the environment to take different configuration loading.");
 						suggestions.push(matchEnvItem);
-					}
-				} else if (this.getParentKeyAtLevel(document, position.line, indentLevel - 1) === "job_def") 
-				{
-					if (linePrefix.trim() === "")
-					{
-						suggestions.push(new vscode.CompletionItem("namespace:", vscode.CompletionItemKind.Property));
-						suggestions.push(new vscode.CompletionItem("name:", vscode.CompletionItemKind.Property));
 					}
 				} else if (this.getParentKeyAtLevel(document, position.line, indentLevel - 1) === "data_quality_check") 
 				{
@@ -1706,7 +1713,56 @@ class YamlHoverProvider implements vscode.HoverProvider {
 			"  - `allow_safe_type_changes`: allow safe data type changes \n\n" +
 			"- notes: allow_all_type_changes depends on spark platform schema evolution support. Even you set allow_all_type_changes but most of unsafe type changes are not supported by Databricks directly, it will still fail. \n\n";
 			return(this.createHover(hoverText));
+		} else if (word === "timezone:") {
+			const hoverText =
+			"**timezone**: Define the timezone of data pipeline running. \n\n" +
+			"- Type: `string`, optional. Please be noted timezone is `disabled` by default. You need to set `timezone_enabled` to `true` to activate it. \n\n" +
+			"- Sample values: \n\n" +
+			"  - `UTC` \n\n" +
+			"  - `America/New_York` \n\n" +
+			"  - `Asia/Shanghai` \n\n" +
+			"  - `Europe/London` \n\n" +
+			"  - `Europe/Warsaw` \n\n" +
+			"  - `Europe/Amsterdam` \n\n";
+			return(this.createHover(hoverText));
+		} else if (word === "timezone_enabled:") {
+			const hoverText =
+			"**timezone_enabled**: Define whether the timezone is enabled or not. \n\n" +
+			"- Type: `boolean`, optional\n\n" +
+			"- Default value: `false`\n\n" +
+			"- Allowed values: \n\n" +
+			"  - `true`: enabled\n\n" +
+			"  - `false`: disabled\n\n";
+			return(this.createHover(hoverText));
+		} else if (word === "spark_conf:") {
+			const hoverText =
+			"**spark_conf**: Define the spark configurations on the job / ui cluster to run the data pipeline. You can use !load_yaml to load the configurations stored in a yaml file. \n\n" +
+			"- Type: `struct`, required\n\n" +
+			"- Structure Example: \n\n" +
+			"  ```yaml\n\n" +
+			"  spark_conf:\n\n" +
+			"    spark.databricks.delta.preview.enabled: true\n\n" +
+			"    spark.sql.legacy.timeParserPolicy: CORRECTED\n\n" +
+			"    spark.databricks.io.cache.enabled: true\n\n" +
+			"    spark.sql.adaptive.skewJoin.skewedPartitionThresholdInBytes: 2097152\n\n" +
+			"  ```";
+			return(this.createHover(hoverText));
+		} else if (word === "namespace:") {
+			const hoverText =
+			"**namespace**: Define the namespace in the job definition. It's the data pipeline path folder with `/` replaced by `.` without `pipeline.` like `raw.avair` \n\n" +
+			"- Type: `string`, optional\n\n";
+			return(this.createHover(hoverText));
+		} else if (word === "auto_loader:") {
+			const hoverText =
+			"**auto_loader**: Define the auto loader configurations of data pipeline. \n\n" +
+			"- Type: `struct`, optional\n\n" +
+			"- Structure: \n\n" +
+			"  - `include_existing_files`: whether to include existing files saved in delta table before when processing the auto loader. \n\n" +
+			"  - `queue_name`: define the queue_name. The default queue_name is `job_fqn`-`job_name` \n\n" +
+			"  - `schema_evolution_mode` \n\n";
+			return(this.createHover(hoverText));
 		}
+
 
 
         return undefined; // Return undefined if no hover information is available
