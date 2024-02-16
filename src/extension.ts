@@ -221,7 +221,7 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
 
 					}
 				}
-				if (this.getParentKeyAtLevel(document, position.line, 0) === "- wireframe") 
+				if (this.getParentKeyAtLevel(document, position.line, 0) === "wireframe") 
 				{
 					if (linePrefix.trim() === "")
 					{
@@ -239,6 +239,49 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
 						suggestions.push(new vscode.CompletionItem("dep_column:", vscode.CompletionItemKind.Property));
 						suggestions.push(new vscode.CompletionItem("dep_filter:", vscode.CompletionItemKind.Property));
 						suggestions.push(new vscode.CompletionItem("name:", vscode.CompletionItemKind.Property));
+					}
+				}
+				if (this.getParentKeyAtLevel(document, position.line, 0) === "dataQualityCheck"){
+					if (linePrefix.trim() === ""){
+						suggestions.push(new vscode.CompletionItem("- from:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_values_to_be_between:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_values_to_not_be_null:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_values_to_be_in_set:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_values_to_match_regex:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_mean_to_be_between:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_median_to_be_between:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_stdev_to_be_between:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_table_column_count_to_equal:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_values_to_be_unique:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_table_row_count_to_be_between:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_distinct_values_to_be_in_set:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_max_to_be_between:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_min_to_be_between:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_most_common_value_to_be_in_set:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_pair_values_a_to_be_greater_than_b:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_proportion_of_unique_values_to_be_between:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_sum_to_be_between:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_to_exist:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_unique_value_count_to_be_between:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_values_to_match_strftime_format:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_values_to_be_decreasing:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_values_to_be_json_parseable:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_values_to_be_of_type:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_values_to_match_regex_list:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_table_columns_to_match_ordered_list:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_table_columns_to_match_set:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_multicolumn_sum_to_equal:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_values_to_be_null:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_values_to_not_match_regex:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_values_to_not_match_regex_list:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_compound_columns_to_be_unique:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_distinct_values_to_contain_set:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_distinct_values_to_equal_set:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_pair_values_to_be_in_set:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_value_lengths_to_be_between:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_value_lengths_to_equal:", vscode.CompletionItemKind.Property));
+						suggestions.push(new vscode.CompletionItem("- expect_column_value_z_scores_to_be_less_than:", vscode.CompletionItemKind.Property));
+
 					}
 				}
 
@@ -303,7 +346,14 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
 					let destHandlingClassItem = new vscode.CompletionItem("handling_class:", vscode.CompletionItemKind.Property);
 					destHandlingClassItem.documentation = new vscode.MarkdownString("Define the handling class for your data destination. You can define your custom destination handler here.");
 					suggestions.push(destHandlingClassItem);
-					
+
+					let primaryKeyNullCheckItem = new vscode.CompletionItem("primary_key_null_check:", vscode.CompletionItemKind.Property);
+					primaryKeyNullCheckItem.documentation = new vscode.MarkdownString("Define whether the primary key null check is required. <br> The default value is `true`. ");
+					suggestions.push(primaryKeyNullCheckItem);
+
+					let ucRegistryItem = new vscode.CompletionItem("uc_registry:", vscode.CompletionItemKind.Property);
+					ucRegistryItem.documentation = new vscode.MarkdownString("Define the unity catalog information if you want the destination table to be registered in uc.");
+					suggestions.push(ucRegistryItem);
 				}
 				if (linePrefix.trim().endsWith("format:")) {
 					// Suggestions for 'format' values
@@ -318,6 +368,7 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
 					suggestions.push(new vscode.CompletionItem("jdbc_mysql", vscode.CompletionItemKind.Value));
 					suggestions.push(new vscode.CompletionItem("jdbc_oracle", vscode.CompletionItemKind.Value));
 					suggestions.push(new vscode.CompletionItem("jdbc_synapse", vscode.CompletionItemKind.Value));
+					suggestions.push(new vscode.CompletionItem("unity_catalog", vscode.CompletionItemKind.Value));
 				}
 				if (linePrefix.trim().endsWith("layer:")) {
 					// Suggestions for 'layer' values
@@ -817,6 +868,19 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
 					let loadYamlItem = new vscode.CompletionItem("!load_yaml ", vscode.CompletionItemKind.Property);
 					loadYamlItem.documentation = new vscode.MarkdownString("Load the spark configuration from existing yaml file.");
 					suggestions.push(loadYamlItem);
+				}
+			} else if (topLevelKey === "destination") {
+				const parentKey = this.getParentKeyForLevel3(document, position.line);
+				if (parentKey === "uc_registry"){
+					let catalogItem = new vscode.CompletionItem("catalog:", vscode.CompletionItemKind.Property);
+					catalogItem.documentation = new vscode.MarkdownString("Define the catalog name in unity catalog.");
+					suggestions.push(catalogItem);
+					let fullNameItem = new vscode.CompletionItem("full_name:", vscode.CompletionItemKind.Property);
+					fullNameItem.documentation = new vscode.MarkdownString("Define the full name of the table. <br> The format is `schema.table_name`. <br> It's optional if ingored, it will use `layer`.`name` as the full name.");
+					suggestions.push(fullNameItem);
+					let warehouseEndpointItem = new vscode.CompletionItem("warehouse_endpoint:", vscode.CompletionItemKind.Property);
+					warehouseEndpointItem.documentation = new vscode.MarkdownString("Define the warehouse endpoint. If ignored, it will create a new serverless sql warehouse named `uc-access-endpoint`");
+					suggestions.push(warehouseEndpointItem);
 				}
 			}
 		} else if (indentLevel === 4) {
