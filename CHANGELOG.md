@@ -2,6 +2,10 @@
 
 All notable changes to the "ara-yaml-assist" extension will be documented in this file.
 
+## 0.1.0 - 2023-02-16
+- Add data quality support for `transformation` level
+- Fix some small bugs
+
 ## 0.0.9 - 2023-02-01
 - fix `job_def` level, add more hover description
 
