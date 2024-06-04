@@ -295,7 +295,7 @@ class AraYamlCompletionItemProvider implements vscode.CompletionItemProvider {
 					suggestions.push(new vscode.CompletionItem("write_mode:", vscode.CompletionItemKind.Property));
 					suggestions.push(new vscode.CompletionItem("engine:", vscode.CompletionItemKind.Property));
 					suggestions.push(new vscode.CompletionItem("from:", vscode.CompletionItemKind.Property));
-					let primaryKeysItem = new vscode.CompletionItem("primary_keys:", vscode.CompletionItemKind.Property);
+					let primaryKeysItem = new vscode.CompletionItem("primary_key:", vscode.CompletionItemKind.Property);
 					primaryKeysItem.documentation = new vscode.MarkdownString("Define the primary keys for your data destination. <br> The type is `list` not `string`.");
 					suggestions.push(primaryKeysItem);
 					let scope_keyItem = new vscode.CompletionItem("scope_key:", vscode.CompletionItemKind.Property);
@@ -1825,7 +1825,34 @@ class YamlHoverProvider implements vscode.HoverProvider {
 			"  - `queue_name`: define the queue_name. The default queue_name is `job_fqn`-`job_name` \n\n" +
 			"  - `schema_evolution_mode` \n\n";
 			return(this.createHover(hoverText));
+		} else if (word === "primary_key:") {
+			const hoverText =
+			"**primary_key**: Define the primary key of data destination. It is supposed to use when `write_mode` is `replace`, `upsert`, or `write_mode` is `scd_technical_events` or `scd_technical_events_dedupe` \n\n" +
+			"- Type: `list`, optional\n\n" +
+			"- Allowed values: \n\n" +
+			"  - column names of the data destination. \n\n" +
+			"- example: \n\n" +
+			"  ```yaml\n\n" +
+			"  destination:\n\n" +
+			"    dest:\n\n" +
+			"      ...\n\n" +
+			"      primary_key: [id, name, org]\n\n";
+			return(this.createHover(hoverText));
+		} else if (word === "event_order:") {
+			const hoverText =
+			"**event_order**: Define the event order column of data destination in order to fetch the latest one if any duplications. It is supposed to use when `write_mode` is `replace`, `upsert`, `scd_technical_events` or `scd_technical_events_dedupe` \n\n" +
+			"- Type: `list`, optional\n\n" +
+			"- Allowed values: \n\n" +
+			"  - column names of the data destination. \n\n" +
+			"- example: \n\n" +
+			"  ```yaml\n\n" +
+			"  destination:\n\n" +
+			"    dest:\n\n" +
+			"      ...\n\n" +
+			"      event_order: [event_time]\n\n";
+			return(this.createHover(hoverText));
 		}
+
 
 
 

@@ -2,6 +2,10 @@
 
 All notable changes to the "ara-yaml-assist" extension will be documented in this file.
 
+## 0.1.1 - 2023-02-17
+- Fix primary_key typo
+- Add hover for primary_key and event_order
+
 ## 0.1.0 - 2023-02-16
 - Add data quality support for `transformation` level
 - Fix some small bugs
